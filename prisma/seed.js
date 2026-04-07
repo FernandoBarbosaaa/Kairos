@@ -3,7 +3,7 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Iniciando seed do banco...");
+  console.log("🌱 Iniciando seed...");
 
   // Limpar dados antigos
   await prisma.payment.deleteMany();
@@ -12,92 +12,100 @@ async function main() {
   await prisma.lot.deleteMany();
   await prisma.event.deleteMany();
 
-  // Criar evento de teste com lotes
+  // Criar um evento de exemplo
   const event = await prisma.event.create({
     data: {
       name: "Retiro Espiritual 2024",
-      eventDate: new Date("2024-06-15"),
-      lots: {
-        create: [
-          {
-            name: "Lote 1 - Antecipado",
-            price: 800,
-            startDate: new Date("2024-03-01"),
-            endDate: new Date("2024-03-31"),
-          },
-          {
-            name: "Lote 2 - Normal",
-            price: 900,
-            startDate: new Date("2024-04-01"),
-            endDate: new Date("2024-04-30"),
-          },
-          {
-            name: "Lote 3 - Última Hora",
-            price: 1000,
-            startDate: new Date("2024-05-01"),
-            endDate: new Date("2024-06-15"),
-          },
-        ],
-      },
+      eventDate: new Date("2024-12-15"),
     },
   });
 
-  console.log("✅ Evento criado:", event.name);
+  console.log(`✅ Evento criado: ${event.name}`);
 
-  // Buscar os lotes criados
-  const lots = await prisma.lot.findMany({
-    where: { eventId: event.id },
+  // Criar lotes com preços diferentes por período
+  const lot1 = await prisma.lot.create({
+    data: {
+      name: "Lote 1 - Antecipado",
+      price: 500,
+      startDate: new Date("2024-09-01"),
+      endDate: new Date("2024-10-31"),
+      eventId: event.id,
+    },
   });
 
-  // Criar participant de teste
+  const lot2 = await prisma.lot.create({
+    data: {
+      name: "Lote 2 - Normal",
+      price: 650,
+      startDate: new Date("2024-11-01"),
+      endDate: new Date("2024-12-05"),
+      eventId: event.id,
+    },
+  });
+
+  const lot3 = await prisma.lot.create({
+    data: {
+      name: "Lote 3 - Última Chance",
+      price: 800,
+      startDate: new Date("2024-12-06"),
+      endDate: new Date("2024-12-14"),
+      eventId: event.id,
+    },
+  });
+
+  console.log(`✅ Lotes criados: ${lot1.name}, ${lot2.name}, ${lot3.name}`);
+
+  // Criar um participante de exemplo
   const participant = await prisma.participant.create({
     data: {
       fullName: "João Silva",
       email: "joao@example.com",
-      phone: "(11) 98765-4321",
-      eventId: event.id,
-      lotId: lots[0].id, // Lote 1
-      agreedPrice: lots[0].price,
-      totalInstallments: 12,
+      phone: "11999999999",
       status: "pending",
+      agreedPrice: lot1.price,
+      eventId: event.id,
+      lotId: lot1.id,
     },
   });
 
-  console.log("✅ Participante criado:", participant.fullName);
+  console.log(`✅ Participante criado: ${participant.fullName}`);
 
-  // Criar parcelas
+  // Criar parcelas automáticas
+  const installmentAmount = lot1.price / 12;
   const installments = [];
+
   for (let i = 1; i <= 12; i++) {
-    const dueDate = new Date("2024-05-15");
-    dueDate.setMonth(dueDate.getMonth() + i);
+    const dueDate = new Date(event.eventDate);
+    dueDate.setMonth(dueDate.getMonth() - (12 - i));
 
     const installment = await prisma.installment.create({
       data: {
-        participantId: participant.id,
         number: i,
-        amount: lots[0].price / 12,
+        amount: installmentAmount,
         dueDate,
-        status: i === 1 ? "paid" : "pending", // Primeira paga
+        status: "pending",
+        participantId: participant.id,
       },
     });
+
     installments.push(installment);
   }
 
-  console.log("✅ 12 parcelas criadas");
+  console.log(`✅ ${installments.length} parcelas criadas`);
 
-  // Criar pagamento para primeira parcela
+  // Registrar um pagamento de teste
   const payment = await prisma.payment.create({
     data: {
-      participantId: participant.id,
-      installmentId: installments[0].id,
-      amount: installments[0].amount,
+      amount: installmentAmount,
       method: "pix",
       status: "completed",
       paidAt: new Date(),
+      participantId: participant.id,
+      installmentId: installments[0].id,
     },
   });
 
-  console.log("✅ Pagamento registrado");
+  console.log(`✅ Pagamento registrado: R$ ${payment.amount}`);
 
   console.log("\n🎉 Seed completado com sucesso!");
 }

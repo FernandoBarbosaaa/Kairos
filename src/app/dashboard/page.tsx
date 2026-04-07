@@ -3,6 +3,8 @@
 import { StatCard } from "@/components/dashboard/stat-card";
 import { RecentEventsCard } from "@/components/dashboard/recent-events";
 import { NewEventButton } from "@/components/dashboard/new-event-button";
+
+export const dynamic = "force-dynamic";
 import {
   TrendingUp,
   Users,
