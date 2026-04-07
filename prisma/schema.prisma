@@ -10,18 +10,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String     @id @default(cuid())
-  email     String     @unique
-  password  String
-  name      String
-  role      String     @default("organizador") // admin, organizador
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  
-  events    Event[]
-}
-
 model Event {
   id        String     @id @default(cuid())
   name      String
@@ -29,13 +17,8 @@ model Event {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   
-  userId    String
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
   lots      Lot[]
   participants Participant[]
-  
-  @@index([userId])
 }
 
 model Lot {

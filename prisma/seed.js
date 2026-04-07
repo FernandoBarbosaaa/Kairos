@@ -1,38 +1,22 @@
 const { PrismaClient } = require("@prisma/client");
-const bcryptjs = require("bcryptjs");
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log("🌱 Iniciando seed do banco...");
 
-  // Limpar dados antigos (opcional)
+  // Limpar dados antigos
   await prisma.payment.deleteMany();
   await prisma.installment.deleteMany();
   await prisma.participant.deleteMany();
   await prisma.lot.deleteMany();
   await prisma.event.deleteMany();
-  await prisma.user.deleteMany();
-
-  // Criar usuário de teste
-  const hashedPassword = await bcryptjs.hash("password123", 10);
-  const user = await prisma.user.create({
-    data: {
-      email: "test@example.com",
-      password: hashedPassword,
-      name: "Usuário Teste",
-      role: "admin",
-    },
-  });
-
-  console.log("✅ Usuário criado:", user.email);
 
   // Criar evento de teste com lotes
   const event = await prisma.event.create({
     data: {
       name: "Retiro Espiritual 2024",
       eventDate: new Date("2024-06-15"),
-      userId: user.id,
       lots: {
         create: [
           {
@@ -116,8 +100,6 @@ async function main() {
   console.log("✅ Pagamento registrado");
 
   console.log("\n🎉 Seed completado com sucesso!");
-  console.log("📧 Email: test@example.com");
-  console.log("🔐 Senha: password123");
 }
 
 main()

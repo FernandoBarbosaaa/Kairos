@@ -4,29 +4,13 @@ import { prisma } from "@/lib/prisma";
 import { createEventSchema } from "@/lib/validators";
 import { revalidatePath } from "next/cache";
 
-// TODO: Get real user ID from session
-const TEST_USER_ID = "user-1";
-
-async function getTestUser() {
-  // Get first user from database (for development)
-  const user = await prisma.user.findFirst();
-  if (!user) {
-    throw new Error("Nenhum usuário encontrado. Execute 'node prisma/seed.js' primeiro.");
-  }
-  return user.id;
-}
-
 export async function createEvent(data: unknown) {
   const validated = createEventSchema.parse(data);
-
-  // Get actual user ID from database
-  const userId = await getTestUser();
 
   const event = await prisma.event.create({
     data: {
       name: validated.name,
       eventDate: validated.eventDate,
-      userId,
     },
   });
 
@@ -36,12 +20,8 @@ export async function createEvent(data: unknown) {
   return event;
 }
 
-export async function getEvents(userId?: string) {
-  // If no userId provided, get first user
-  const actualUserId = userId || (await getTestUser());
-
+export async function getEvents() {
   return prisma.event.findMany({
-    where: { userId: actualUserId },
     include: {
       lots: true,
       participants: true,

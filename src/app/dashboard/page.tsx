@@ -51,7 +51,7 @@ export default function DashboardPage() {
     async function loadData() {
       try {
         // Load events
-        const events = await getEvents("user-1");
+        const events = await getEvents();
 
         // Convert to RecentEvent format
         const recentEventsConverted: RecentEvent[] = events.map((event: any) => ({
