@@ -160,44 +160,6 @@ export default function PaymentsPage() {
     </div>
   );
 }
-          <Plus className="w-4 h-4" />
-          Registrar Pagamento
-        </Button>
-      </div>
-
-      {loading ? (
-        <p className="text-slate-400">Carregando...</p>
-      ) : payments.length === 0 ? (
-        <Card className="bg-slate-900/50 border-slate-800 p-12 text-center">
-          <p className="text-slate-400">Nenhum pagamento registrado</p>
-        </Card>
-      ) : (
-        <Card className="bg-slate-900/50 border-slate-800 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="border-b border-slate-800 bg-slate-800/50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
-                    Participante
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
-                    Valor
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
-                    Método
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
-                    Data
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
-                    Ações
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800">
                 {payments.map((payment) => (
                   <tr
                     key={payment.id}

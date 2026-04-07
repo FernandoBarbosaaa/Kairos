@@ -3,7 +3,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, ArrowLeft, Eye } from "lucide-react";
+import { Trash2, ArrowLeft, Eye } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -22,6 +22,23 @@ interface Participant {
   event: { name: string; id: string };
 }
 
+async function getAllParticipants(): Promise<Participant[]> {
+  try {
+    const participants = await prisma.participant.findMany({
+      include: {
+        event: {
+          select: { name: true, id: true }
+        }
+      },
+      orderBy: { createdAt: "desc" }
+    });
+    return participants as Participant[];
+  } catch (error) {
+    console.error("Erro ao carregar participantes:", error);
+    return [];
+  }
+}
+
 export default function ParticipantsPage() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,13 +51,11 @@ export default function ParticipantsPage() {
   async function loadParticipants() {
     try {
       setLoading(true);
-      const response = await fetch("/api/participants");
-      if (response.ok) {
-        const data = await response.json();
-        setParticipants(data);
-      }
+      const data = await getAllParticipants();
+      setParticipants(data);
     } catch (error) {
       console.error(error);
+      toast.error("Erro ao carregar participantes");
     } finally {
       setLoading(false);
     }
@@ -147,7 +162,7 @@ export default function ParticipantsPage() {
                         variant="ghost"
                         onClick={() => handleDelete(participant.id)}
                         className="text-red-400 hover:text-red-300"
-                      >
+                      
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </td>
