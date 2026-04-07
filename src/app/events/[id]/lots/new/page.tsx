@@ -8,7 +8,6 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { createLot } from "@/actions/lots";
 
 export default function NewLotPage() {
   const params = useParams();
@@ -28,13 +27,18 @@ export default function NewLotPage() {
     setLoading(true);
 
     try {
-      await createLot({
+      const res = await fetch("/api/lots", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
         name: formData.name,
         price: parseFloat(formData.price),
         startDate: formData.startDate,
         endDate: formData.endDate,
         eventId,
+        }),
       });
+      if (!res.ok) throw new Error("Falha ao criar lote");
       toast.success("Lote criado com sucesso!");
       router.push(`/events/${eventId}`);
     } catch (error) {

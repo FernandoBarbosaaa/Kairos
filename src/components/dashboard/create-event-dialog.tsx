@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { toast } from "sonner";
-import { createEvent } from "@/actions/events";
 
 interface CreateEventDialogProps {
   open: boolean;
@@ -20,6 +19,9 @@ export function CreateEventDialog({
   const [formData, setFormData] = useState({
     name: "",
     eventDate: "",
+    location: "",
+    totalPrice: "",
+    description: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,20 +32,28 @@ export function CreateEventDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.eventDate) {
+    if (!formData.name || !formData.eventDate || !formData.location || !formData.totalPrice) {
       toast.error("Preencha todos os campos");
       return;
     }
 
     setLoading(true);
     try {
-      await createEvent({
-        name: formData.name,
-        eventDate: new Date(formData.eventDate),
+      const res = await fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          eventDate: formData.eventDate,
+          location: formData.location,
+          totalPrice: parseFloat(formData.totalPrice || "0"),
+          description: formData.description || undefined,
+        }),
       });
+      if (!res.ok) throw new Error("Falha ao criar evento");
 
       toast.success("Evento criado com sucesso!");
-      setFormData({ name: "", eventDate: "" });
+      setFormData({ name: "", eventDate: "", location: "", totalPrice: "", description: "" });
       onOpenChange(false);
     } catch (error) {
       toast.error("Erro ao criar evento");
@@ -84,6 +94,50 @@ export function CreateEventDialog({
               value={formData.eventDate}
               onChange={handleChange}
               className="bg-slate-800 border-slate-700 text-white"
+              disabled={loading}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Local
+            </label>
+            <Input
+              type="text"
+              name="location"
+              placeholder="Ex: Sítio Recanto da Paz"
+              value={formData.location}
+              onChange={handleChange}
+              className="bg-slate-800 border-slate-700 text-white placeholder-slate-500"
+              disabled={loading}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Valor Total do Retiro (R$)
+            </label>
+            <Input
+              type="number"
+              name="totalPrice"
+              placeholder="0.00"
+              step="0.01"
+              min="0"
+              value={formData.totalPrice}
+              onChange={handleChange}
+              className="bg-slate-800 border-slate-700 text-white placeholder-slate-500"
+              disabled={loading}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Descrição (opcional)
+            </label>
+            <Input
+              type="text"
+              name="description"
+              placeholder="Detalhes do retiro..."
+              value={formData.description}
+              onChange={handleChange}
+              className="bg-slate-800 border-slate-700 text-white placeholder-slate-500"
               disabled={loading}
             />
           </div>

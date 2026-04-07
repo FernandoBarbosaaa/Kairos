@@ -3,17 +3,25 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export default function NewParticipantPage() {
+type LotOption = { id: string; name: string; price: number };
+
+export default function EditParticipantPage() {
   const params = useParams();
   const router = useRouter();
-  const eventId = params.id as string;
+  const participantId = params.id as string;
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const [participant, setParticipant] = useState<any>(null);
+  const [lots, setLots] = useState<LotOption[]>([]);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -22,78 +30,114 @@ export default function NewParticipantPage() {
     lotId: "",
     totalInstallments: 12,
   });
-  const [loading, setLoading] = useState(false);
-  const [lots, setLots] = useState<{ id: string; name: string; price: number }[]>([]);
-  const [loadingLots, setLoadingLots] = useState(true);
+
+  const backHref = useMemo(() => {
+    if (participant?.id) return `/participants/${participant.id}`;
+    return "/participants";
+  }, [participant]);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`/api/lots?eventId=${eventId}`, { cache: "no-store" });
-        if (!cancelled && res.ok) setLots(await res.json());
+        setLoading(true);
+        const res = await fetch(`/api/participants/${participantId}`, { cache: "no-store" });
+        if (!res.ok) throw new Error("Falha ao carregar participante");
+        const data = await res.json();
+        if (cancelled) return;
+
+        setParticipant(data);
+        setFormData({
+          fullName: data.fullName ?? "",
+          email: data.email ?? "",
+          phone: data.phone ?? "",
+          lotId: data.lotId ?? "",
+          totalInstallments: data.totalInstallments ?? 12,
+        });
+
+        const lotsRes = await fetch(`/api/lots?eventId=${data.eventId}`, { cache: "no-store" });
+        if (lotsRes.ok && !cancelled) setLots(await lotsRes.json());
+      } catch (error) {
+        console.error(error);
+        toast.error("Erro ao carregar participante");
       } finally {
-        if (!cancelled) setLoadingLots(false);
+        if (!cancelled) setLoading(false);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [eventId]);
+  }, [participantId]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-
+    setSaving(true);
     try {
-      const res = await fetch("/api/participants", {
-        method: "POST",
+      const res = await fetch(`/api/participants/${participantId}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           fullName: formData.fullName,
           email: formData.email,
           phone: formData.phone,
-          eventId,
           lotId: formData.lotId || undefined,
           totalInstallments: formData.totalInstallments,
         }),
       });
+
       if (res.status === 409) {
         toast.error("Já existe um participante com este email neste evento");
         return;
       }
-      if (!res.ok) throw new Error("Falha ao criar participante");
-      toast.success("Participante criado com sucesso!");
-      router.push(`/events/${eventId}`);
+      if (!res.ok) throw new Error("Falha ao salvar");
+
+      toast.success("Participante atualizado");
+      router.push(backHref);
     } catch (error) {
-      toast.error("Erro ao criar participante");
       console.error(error);
+      toast.error("Erro ao salvar participante");
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-slate-400">Carregando...</p>
+      </div>
+    );
+  }
+
+  if (!participant) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-slate-400">Participante não encontrado</p>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Link href={`/events/${eventId}`}>
+        <Link href={backHref}>
           <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
             <ArrowLeft className="w-4 h-4" />
           </Button>
         </Link>
-        <h1 className="text-3xl font-bold text-white">Novo Participante</h1>
+        <div className="flex-1">
+          <h1 className="text-3xl font-bold text-white">Editar Participante</h1>
+          <p className="text-slate-400 mt-1">{participant.fullName}</p>
+        </div>
       </div>
 
       <Card className="bg-slate-900/50 border-slate-800 p-8 max-w-2xl">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              Nome Completo *
-            </label>
+            <label className="block text-sm font-medium text-white mb-2">Nome Completo *</label>
             <Input
               type="text"
               required
-              placeholder="Ex: João da Silva"
               value={formData.fullName}
               onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
               className="bg-slate-900 border-slate-700 text-white placeholder:text-slate-500"
@@ -101,13 +145,10 @@ export default function NewParticipantPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              Email *
-            </label>
+            <label className="block text-sm font-medium text-white mb-2">Email *</label>
             <Input
               type="email"
               required
-              placeholder="Ex: joao@example.com"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="bg-slate-900 border-slate-700 text-white placeholder:text-slate-500"
@@ -115,13 +156,10 @@ export default function NewParticipantPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              Telefone *
-            </label>
+            <label className="block text-sm font-medium text-white mb-2">Telefone *</label>
             <Input
               type="tel"
               required
-              placeholder="Ex: 11999999999"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               className="bg-slate-900 border-slate-700 text-white placeholder:text-slate-500"
@@ -129,16 +167,13 @@ export default function NewParticipantPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              Lote *
-            </label>
+            <label className="block text-sm font-medium text-white mb-2">Lote *</label>
             <Select
               value={formData.lotId}
               onValueChange={(value) => setFormData({ ...formData, lotId: value ?? "" })}
-              disabled={loadingLots || lots.length === 0}
             >
               <SelectTrigger className="bg-slate-900 border-slate-700 text-white">
-                <SelectValue placeholder={loadingLots ? "Carregando lotes..." : "Selecione um lote"} />
+                <SelectValue placeholder="Selecione um lote" />
               </SelectTrigger>
               <SelectContent>
                 {lots.map((lot) => (
@@ -148,47 +183,33 @@ export default function NewParticipantPage() {
                 ))}
               </SelectContent>
             </Select>
-            {(!loadingLots && lots.length === 0) && (
-              <p className="text-xs text-slate-400 mt-2">
-                Nenhum lote cadastrado para este evento. Crie um lote antes de adicionar participantes.
-              </p>
-            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              Número de Parcelas
-            </label>
+            <label className="block text-sm font-medium text-white mb-2">Número de Parcelas</label>
             <Input
               type="number"
               min="1"
               max="48"
               value={formData.totalInstallments}
-              onChange={(e) =>
-                setFormData({ ...formData, totalInstallments: parseInt(e.target.value) })
-              }
+              onChange={(e) => setFormData({ ...formData, totalInstallments: parseInt(e.target.value || "1") })}
               className="bg-slate-900 border-slate-700 text-white"
             />
           </div>
 
-          <div className="flex gap-3 pt-4">
-            <Link href={`/events/${eventId}`} className="flex-1">
+          <div className="flex gap-3 pt-2">
+            <Link href={backHref} className="flex-1">
               <Button variant="outline" className="w-full">
                 Cancelar
               </Button>
             </Link>
             <Button
               type="submit"
-              disabled={
-                loading ||
-                !formData.fullName ||
-                !formData.email ||
-                !formData.phone ||
-                !formData.lotId
-              }
-              className="flex-1 bg-blue-600 hover:bg-blue-700"
+              disabled={saving || !formData.fullName || !formData.email || !formData.phone || !formData.lotId}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 gap-2"
             >
-              {loading ? "Criando..." : "Criar Participante"}
+              <Save className="w-4 h-4" />
+              {saving ? "Salvando..." : "Salvar"}
             </Button>
           </div>
         </form>
@@ -196,3 +217,4 @@ export default function NewParticipantPage() {
     </div>
   );
 }
+

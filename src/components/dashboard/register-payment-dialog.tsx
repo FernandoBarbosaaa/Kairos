@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { toast } from "sonner";
-import { createPayment } from "@/actions/payments";
 
 interface RegisterPaymentDialogProps {
   open: boolean;
@@ -49,13 +48,18 @@ export function RegisterPaymentDialog({
 
     setLoading(true);
     try {
-      await createPayment({
-        participantId,
-        installmentId: installmentId || undefined,
-        amount: formData.amount,
-        method: formData.method,
-        notes: formData.notes || undefined,
+      const res = await fetch("/api/payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          participantId,
+          installmentId: installmentId || undefined,
+          amount: formData.amount,
+          method: formData.method,
+          notes: formData.notes || undefined,
+        }),
       });
+      if (!res.ok) throw new Error("Falha ao registrar pagamento");
 
       toast.success("Pagamento registrado com sucesso!");
       setFormData({ amount: 0, method: "pix", notes: "" });

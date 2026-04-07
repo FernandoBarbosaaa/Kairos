@@ -3,9 +3,9 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { createParticipant } from "@/actions/participants";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface CreateParticipantDialogProps {
   open: boolean;
@@ -23,8 +23,26 @@ export function CreateParticipantDialog({
     fullName: "",
     email: "",
     phone: "",
+    lotId: "",
     totalInstallments: 12,
   });
+  const [lots, setLots] = useState<{ id: string; name: string; price: number }[]>([]);
+  const [loadingLots, setLoadingLots] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/lots?eventId=${eventId}`, { cache: "no-store" });
+        if (!cancelled && res.ok) setLots(await res.json());
+      } finally {
+        if (!cancelled) setLoadingLots(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [eventId]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -39,23 +57,33 @@ export function CreateParticipantDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.fullName || !formData.email || !formData.phone) {
+    if (!formData.fullName || !formData.email || !formData.phone || !formData.lotId) {
       toast.error("Preencha todos os campos");
       return;
     }
 
     setLoading(true);
     try {
-      await createParticipant({
-        fullName: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        eventId,
-        totalInstallments: formData.totalInstallments,
+      const res = await fetch("/api/participants", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          eventId,
+          lotId: formData.lotId,
+          totalInstallments: formData.totalInstallments,
+        }),
       });
+      if (res.status === 409) {
+        toast.error("Já existe um participante com este email neste evento");
+        return;
+      }
+      if (!res.ok) throw new Error("Falha ao adicionar participante");
 
       toast.success("Participante adicionado com sucesso!");
-      setFormData({ fullName: "", email: "", phone: "", totalInstallments: 12 });
+      setFormData({ fullName: "", email: "", phone: "", lotId: "", totalInstallments: 12 });
       onOpenChange(false);
     } catch (error: any) {
       toast.error(error.message || "Erro ao adicionar participante");
@@ -115,6 +143,28 @@ export function CreateParticipantDialog({
               className="bg-slate-800 border-slate-700 text-white placeholder-slate-500"
               disabled={loading}
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Lote
+            </label>
+            <Select
+              value={formData.lotId}
+              onValueChange={(value) => setFormData((prev) => ({ ...prev, lotId: value ?? "" }))}
+              disabled={loading || loadingLots || lots.length === 0}
+            >
+              <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                <SelectValue placeholder={loadingLots ? "Carregando lotes..." : "Selecione um lote"} />
+              </SelectTrigger>
+              <SelectContent>
+                {lots.map((lot) => (
+                  <SelectItem key={lot.id} value={lot.id}>
+                    {lot.name} — R$ {lot.price.toFixed(2)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>

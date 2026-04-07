@@ -4,7 +4,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2, Eye, ArrowLeft } from "lucide-react";
 import { useState, useEffect } from "react";
-import { getEvents, deleteEvent } from "@/actions/events";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -29,7 +28,9 @@ export default function EventsPage() {
   async function loadEvents() {
     try {
       setLoading(true);
-      const data = await getEvents();
+      const res = await fetch("/api/events");
+      if (!res.ok) throw new Error("Falha ao buscar eventos");
+      const data = await res.json();
       setEvents(data as Event[]);
     } catch (error) {
       toast.error("Erro ao carregar eventos");
@@ -43,7 +44,8 @@ export default function EventsPage() {
     if (!confirm("Tem certeza que deseja deletar este evento?")) return;
 
     try {
-      await deleteEvent(id);
+      const res = await fetch(`/api/events/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Falha ao deletar evento");
       toast.success("Evento deletado com sucesso");
       await loadEvents();
     } catch (error) {

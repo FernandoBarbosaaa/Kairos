@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useEffect, useState } from "react";
-import { getEvents } from "@/actions/events";
 
 interface DashboardStats {
   totalEvents: number;
@@ -52,8 +51,9 @@ export default function DashboardPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        // Load events
-        const events = await getEvents();
+        const res = await fetch("/api/events", { cache: "no-store" });
+        if (!res.ok) throw new Error("Falha ao buscar eventos");
+        const events = await res.json();
 
         // Convert to RecentEvent format
         const recentEventsConverted: RecentEvent[] = events.map((event: any) => ({

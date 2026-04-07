@@ -8,8 +8,6 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { getEventById, deleteEvent } from "@/actions/events";
-import { deleteParticipant, getEventParticipants } from "@/actions/participants";
 
 interface Lot {
   id: string;
@@ -55,12 +53,16 @@ export default function EventDetailPage() {
   async function loadEventData() {
     try {
       setLoading(true);
-      const [eventData, participantsData] = await Promise.all([
-        getEventById(eventId),
-        getEventParticipants(eventId),
+      const [eventRes, participantsRes] = await Promise.all([
+        fetch(`/api/events/${eventId}`, { cache: "no-store" }),
+        fetch(`/api/participants?eventId=${eventId}`, { cache: "no-store" }),
       ]);
-      setEvent(eventData as Event);
-      setParticipants(participantsData as Participant[]);
+      if (!eventRes.ok) throw new Error("Falha ao buscar evento");
+      if (!participantsRes.ok) throw new Error("Falha ao buscar participantes");
+      const eventData = await eventRes.json();
+      const participantsData = await participantsRes.json();
+      setEvent(eventData as any);
+      setParticipants(participantsData as any);
     } catch (error) {
       toast.error("Erro ao carregar evento");
       console.error(error);
@@ -73,7 +75,8 @@ export default function EventDetailPage() {
     if (!confirm("Tem certeza que deseja deletar este participante?")) return;
 
     try {
-      await deleteParticipant(participantId);
+      const res = await fetch(`/api/participants/${participantId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Falha ao deletar participante");
       toast.success("Participante deletado com sucesso");
       await loadEventData();
     } catch (error) {
@@ -87,7 +90,8 @@ export default function EventDetailPage() {
       return;
 
     try {
-      await deleteEvent(eventId);
+      const res = await fetch(`/api/events/${eventId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Falha ao deletar evento");
       toast.success("Evento deletado com sucesso");
       router.push("/events");
     } catch (error) {
@@ -137,6 +141,9 @@ export default function EventDetailPage() {
           <p className="text-slate-400 mt-1">
             📅 {new Date(event.eventDate).toLocaleDateString("pt-BR")}
           </p>
+          {"location" in event && (
+            <p className="text-slate-400 mt-1">📍 {(event as any).location}</p>
+          )}
         </div>
         <Button
           variant="outline"

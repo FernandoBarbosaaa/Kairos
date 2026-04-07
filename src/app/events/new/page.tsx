@@ -8,13 +8,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { createEvent } from "@/actions/events";
 
 export default function NewEventPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
     eventDate: "",
+    location: "",
+    description: "",
+    totalPrice: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -23,10 +25,18 @@ export default function NewEventPage() {
     setLoading(true);
 
     try {
-      await createEvent({
-        name: formData.name,
-        eventDate: formData.eventDate,
+      const res = await fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          eventDate: formData.eventDate,
+          location: formData.location,
+          description: formData.description || undefined,
+          totalPrice: parseFloat(formData.totalPrice || "0"),
+        }),
       });
+      if (!res.ok) throw new Error("Falha ao criar evento");
       toast.success("Evento criado com sucesso!");
       router.push("/events");
     } catch (error) {
@@ -77,6 +87,52 @@ export default function NewEventPage() {
             />
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-white mb-2">
+              Local *
+            </label>
+            <Input
+              type="text"
+              required
+              placeholder="Ex: Sítio Recanto da Paz"
+              value={formData.location}
+              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+              className="bg-slate-900 border-slate-700 text-white placeholder:text-slate-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-white mb-2">
+              Descrição
+            </label>
+            <Input
+              type="text"
+              placeholder="Detalhes do retiro (opcional)"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="bg-slate-900 border-slate-700 text-white placeholder:text-slate-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-white mb-2">
+              Valor Total do Retiro *
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-3 text-slate-400">R$</span>
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                required
+                placeholder="0,00"
+                value={formData.totalPrice}
+                onChange={(e) => setFormData({ ...formData, totalPrice: e.target.value })}
+                className="bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 pl-8"
+              />
+            </div>
+          </div>
+
           <div className="flex gap-3 pt-4">
             <Link href="/events" className="flex-1">
               <Button variant="outline" className="w-full">
@@ -85,7 +141,13 @@ export default function NewEventPage() {
             </Link>
             <Button
               type="submit"
-              disabled={loading || !formData.name || !formData.eventDate}
+              disabled={
+                loading ||
+                !formData.name ||
+                !formData.eventDate ||
+                !formData.location ||
+                !formData.totalPrice
+              }
               className="flex-1 bg-blue-600 hover:bg-blue-700"
             >
               {loading ? "Criando..." : "Criar Evento"}

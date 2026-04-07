@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { getParticipantById } from "@/actions/participants";
+import { Pencil } from "lucide-react";
 
 interface Installment {
   id: string;
@@ -57,7 +57,9 @@ export default function ParticipantDetailPage() {
   async function loadParticipantData() {
     try {
       setLoading(true);
-      const data = await getParticipantById(participantId);
+      const res = await fetch(`/api/participants/${participantId}`, { cache: "no-store" });
+      if (!res.ok) throw new Error("Falha ao buscar participante");
+      const data = await res.json();
       setParticipant(data as Participant);
     } catch (error) {
       toast.error("Erro ao carregar participante");
@@ -110,6 +112,14 @@ export default function ParticipantDetailPage() {
         <div>
           <h1 className="text-3xl font-bold text-white">{participant.fullName}</h1>
           <p className="text-slate-400 mt-1">{participant.event.name}</p>
+        </div>
+        <div className="ml-auto">
+          <Link href={`/participants/${participantId}/edit`}>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Pencil className="w-4 h-4" />
+              Editar
+            </Button>
+          </Link>
         </div>
       </div>
 

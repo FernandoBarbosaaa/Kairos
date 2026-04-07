@@ -8,8 +8,6 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { createPayment } from "@/actions/payments";
-import { getParticipantById } from "@/actions/participants";
 
 interface Installment {
   id: string;
@@ -46,7 +44,9 @@ export default function NewPaymentPage() {
 
   async function loadParticipantData() {
     try {
-      const data = await getParticipantById(participantId);
+      const res = await fetch(`/api/participants/${participantId}`, { cache: "no-store" });
+      if (!res.ok) throw new Error("Falha ao buscar participante");
+      const data = await res.json();
       setParticipant(data as Participant);
     } catch (error) {
       toast.error("Erro ao carregar participante");
@@ -61,13 +61,18 @@ export default function NewPaymentPage() {
     setLoading(true);
 
     try {
-      await createPayment({
-        participantId,
-        amount: parseFloat(formData.amount),
-        method: formData.method,
-        installmentId: formData.installmentId || undefined,
-        notes: formData.notes || undefined,
+      const res = await fetch("/api/payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          participantId,
+          amount: parseFloat(formData.amount),
+          method: formData.method,
+          installmentId: formData.installmentId || undefined,
+          notes: formData.notes || undefined,
+        }),
       });
+      if (!res.ok) throw new Error("Falha ao registrar pagamento");
       toast.success("Pagamento registrado com sucesso!");
       router.push(`/participants/${participantId}`);
     } catch (error) {

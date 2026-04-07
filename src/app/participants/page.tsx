@@ -3,12 +3,11 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trash2, ArrowLeft, Eye } from "lucide-react";
+import { Trash2, ArrowLeft, Eye, Pencil } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { prisma } from "@/lib/prisma";
 
 interface Participant {
   id: string;
@@ -24,15 +23,9 @@ interface Participant {
 
 async function getAllParticipants(): Promise<Participant[]> {
   try {
-    const participants = await prisma.participant.findMany({
-      include: {
-        event: {
-          select: { name: true, id: true }
-        }
-      },
-      orderBy: { createdAt: "desc" }
-    });
-    return participants as Participant[];
+    const res = await fetch("/api/participants", { cache: "no-store" });
+    if (!res.ok) return [];
+    return (await res.json()) as Participant[];
   } catch (error) {
     console.error("Erro ao carregar participantes:", error);
     return [];
@@ -157,103 +150,19 @@ export default function ParticipantsPage() {
                           <Eye className="w-4 h-4" />
                         </Button>
                       </Link>
+                      <Link href={`/participants/${participant.id}/edit`}>
+                        <Button size="sm" variant="ghost" className="text-slate-300 hover:text-white">
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                      </Link>
                       <Button
                         size="sm"
                         variant="ghost"
                         onClick={() => handleDelete(participant.id)}
                         className="text-red-400 hover:text-red-300"
-                      
+                      >
                         <Trash2 className="w-4 h-4" />
                       </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-      )}
-    </div>
-  );
-}
-          <Plus className="w-4 h-4" />
-          Novo Participante
-        </Button>
-      </div>
-
-      {loading ? (
-        <p className="text-slate-400">Carregando...</p>
-      ) : participants.length === 0 ? (
-        <Card className="bg-slate-900/50 border-slate-800 p-12 text-center">
-          <p className="text-slate-400">Nenhum participante cadastrado</p>
-        </Card>
-      ) : (
-        <Card className="bg-slate-900/50 border-slate-800 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="border-b border-slate-800 bg-slate-800/50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
-                    Nome
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
-                    Valor
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
-                    Parcelas
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-300">
-                    Ações
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800">
-                {participants.map((participant) => (
-                  <tr
-                    key={participant.id}
-                    className="hover:bg-slate-800/30 transition"
-                  >
-                    <td className="px-6 py-4">
-                      <div>
-                        <p className="font-medium text-white">
-                          {participant.fullName}
-                        </p>
-                        <p className="text-sm text-slate-400">
-                          {participant.email}
-                        </p>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <Badge className={statusColors[participant.status]}>
-                        {statusLabels[participant.status]}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4 text-white font-medium">
-                      R$ {participant.agreedPrice.toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-400">
-                      {participant.paidInstallments}/{participant.totalInstallments}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-blue-400 hover:text-blue-300"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-400 hover:text-red-300"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
                     </td>
                   </tr>
                 ))}

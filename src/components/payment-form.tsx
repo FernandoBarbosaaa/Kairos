@@ -17,7 +17,7 @@ export function PaymentForm({ participantId, maxAmount, onSuccess }: PaymentForm
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     amount: '',
-    method: 'pix',
+    method: 'pix' as string | null,
     notes: '',
   });
 

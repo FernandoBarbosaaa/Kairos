@@ -3,6 +3,9 @@ import { z } from "zod";
 export const createEventSchema = z.object({
   name: z.string().min(3, "Nome do evento deve ter pelo menos 3 caracteres"),
   eventDate: z.coerce.date(),
+  location: z.string().min(2, "Local é obrigatório"),
+  description: z.string().optional(),
+  totalPrice: z.coerce.number().min(0, "Valor total deve ser maior ou igual a 0"),
 });
 
 export const createLotSchema = z.object({
@@ -18,6 +21,7 @@ export const createParticipantSchema = z.object({
   email: z.string().email("Email inválido"),
   phone: z.string().min(10, "Telefone inválido"),
   eventId: z.string().cuid(),
+  lotId: z.string().cuid().optional(),
   totalInstallments: z.coerce.number().min(1).max(48),
 });
 
