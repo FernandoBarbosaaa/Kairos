@@ -77,14 +77,14 @@ export default function NewParticipantPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <Link href={`/events/${eventId}`}>
-          <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+          <Button variant="ghost" size="sm" className="text-white/60 hover:text-white">
             <ArrowLeft className="w-4 h-4" />
           </Button>
         </Link>
-        <h1 className="text-3xl font-bold text-white">Novo Participante</h1>
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-[var(--spiritual-purple)] to-[var(--spiritual-blue)] bg-clip-text text-transparent">Novo Participante</h1>
       </div>
 
-      <Card className="bg-slate-900/50 border-slate-800 p-8 max-w-2xl">
+      <Card className="bg-white/[0.03] border-white/[0.08] p-8 max-w-2xl backdrop-blur-sm">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-white mb-2">
@@ -96,7 +96,7 @@ export default function NewParticipantPage() {
               placeholder="Ex: João da Silva"
               value={formData.fullName}
               onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-              className="bg-slate-900 border-slate-700 text-white placeholder:text-slate-500"
+              className="bg-white/[0.05] border-white/[0.1] text-white placeholder:text-white/40"
             />
           </div>
 
@@ -110,7 +110,7 @@ export default function NewParticipantPage() {
               placeholder="Ex: joao@example.com"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="bg-slate-900 border-slate-700 text-white placeholder:text-slate-500"
+              className="bg-white/[0.05] border-white/[0.1] text-white placeholder:text-white/40"
             />
           </div>
 
@@ -124,7 +124,7 @@ export default function NewParticipantPage() {
               placeholder="Ex: 11999999999"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="bg-slate-900 border-slate-700 text-white placeholder:text-slate-500"
+              className="bg-white/[0.05] border-white/[0.1] text-white placeholder:text-white/40"
             />
           </div>
 
@@ -137,10 +137,10 @@ export default function NewParticipantPage() {
               onValueChange={(value) => setFormData({ ...formData, lotId: value ?? "" })}
               disabled={loadingLots || lots.length === 0}
             >
-              <SelectTrigger className="bg-slate-900 border-slate-700 text-white">
+              <SelectTrigger className="bg-white/[0.05] border-white/[0.1] text-white">
                 <SelectValue placeholder={loadingLots ? "Carregando lotes..." : "Selecione um lote"} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-[var(--spiritual-bg-light)] border-white/[0.1]">
                 {lots.map((lot) => (
                   <SelectItem key={lot.id} value={lot.id}>
                     {lot.name} — R$ {lot.price.toFixed(2)}

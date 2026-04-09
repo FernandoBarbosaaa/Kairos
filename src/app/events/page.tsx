@@ -59,17 +59,17 @@ export default function EventsPage() {
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
           <Link href="/dashboard">
-            <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+            <Button variant="ghost" size="sm" className="text-white/60 hover:text-white">
               <ArrowLeft className="w-4 h-4" />
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-white">Eventos</h1>
-            <p className="text-slate-400 mt-1">Gerencie seus retiros e eventos</p>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-[var(--spiritual-purple)] to-[var(--spiritual-blue)] bg-clip-text text-transparent">Eventos</h1>
+            <p className="text-white/60 mt-1">Gerencie seus retiros e eventos</p>
           </div>
         </div>
         <Link href="/events/new">
-          <Button className="bg-blue-600 hover:bg-blue-700 gap-2">
+          <Button className="bg-gradient-to-r from-[var(--spiritual-purple)] to-[var(--spiritual-blue)] hover:shadow-lg hover:shadow-[var(--spiritual-purple)]/30 gap-2">
             <Plus className="w-4 h-4" />
             Novo Evento
           </Button>
@@ -78,13 +78,13 @@ export default function EventsPage() {
 
       {loading ? (
         <div className="text-center py-12">
-          <p className="text-slate-400">Carregando eventos...</p>
+          <p className="text-white/60">Carregando eventos...</p>
         </div>
       ) : events.length === 0 ? (
-        <Card className="bg-slate-900/50 border-slate-800 p-12 text-center">
-          <p className="text-slate-400 mb-4">Nenhum evento cadastrado</p>
+        <Card className="bg-white/[0.03] border-white/[0.08] p-12 text-center backdrop-blur-sm">
+          <p className="text-white/60 mb-4">Nenhum evento cadastrado</p>
           <Link href="/events/new">
-            <Button className="bg-blue-600 hover:bg-blue-700">
+            <Button className="bg-gradient-to-r from-[var(--spiritual-purple)] to-[var(--spiritual-blue)] hover:shadow-lg hover:shadow-[var(--spiritual-purple)]/30">
               Criar Primeiro Evento
             </Button>
           </Link>
@@ -94,15 +94,15 @@ export default function EventsPage() {
           {events.map((event) => (
             <Card
               key={event.id}
-              className="bg-slate-900/50 border-slate-800 p-6 hover:border-blue-500/50 transition"
+              className="bg-white/[0.03] border-white/[0.08] p-6 hover:border-[var(--spiritual-purple)]/50 hover:bg-white/[0.05] transition backdrop-blur-sm"
             >
               <h3 className="text-lg font-semibold text-white mb-2">
                 {event.name}
               </h3>
-              <p className="text-sm text-slate-400 mb-1">
+              <p className="text-sm text-white/60 mb-1">
                 📅 {new Date(event.eventDate).toLocaleDateString("pt-BR")}
               </p>
-              <p className="text-sm text-slate-400 mb-4">
+              <p className="text-sm text-white/60 mb-4">
                 👥 {event.participants.length} participante(s)
               </p>
               <div className="flex gap-2">
@@ -110,7 +110,7 @@ export default function EventsPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="w-full text-blue-400 hover:text-blue-300"
+                    className="w-full text-[var(--spiritual-blue)] hover:text-[var(--spiritual-purple)] hover:bg-white/[0.1]"
                   >
                     <Eye className="w-4 h-4 mr-1" />
                     Ver
@@ -120,7 +120,7 @@ export default function EventsPage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => handleDelete(event.id)}
-                  className="flex-1 text-red-400 hover:text-red-300"
+                  className="flex-1 text-red-400 hover:text-red-300 hover:bg-red-950/20"
                 >
                   <Trash2 className="w-4 h-4 mr-1" />
                   Remover

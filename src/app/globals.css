@@ -83,38 +83,56 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+/* Spiritual Minimalist Theme - Dark */
+:root {
+  color-scheme: dark;
+}
+
+@supports (color: oklch(0 0 0)) {
+  :root {
+    --spiritual-bg-dark: oklch(0.08 0 0);
+    --spiritual-bg: oklch(0.12 0 0);
+    --spiritual-bg-light: oklch(0.16 0 0);
+    --spiritual-purple: oklch(0.45 0.15 290);
+    --spiritual-blue: oklch(0.50 0.12 260);
+    --spiritual-gold: oklch(0.65 0.08 65);
+    --spiritual-white: oklch(0.95 0 0);
+    --spiritual-muted: oklch(0.4 0 0);
+  }
+}
+
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: var(--spiritual-bg-dark);
+  --foreground: var(--spiritual-white);
+  --card: var(--spiritual-bg);
+  --card-foreground: var(--spiritual-white);
+  --popover: var(--spiritual-bg);
+  --popover-foreground: var(--spiritual-white);
+  --primary: var(--spiritual-purple);
+  --primary-foreground: var(--spiritual-white);
+  --secondary: var(--spiritual-blue);
+  --secondary-foreground: var(--spiritual-white);
+  --muted: var(--spiritual-bg-light);
+  --muted-foreground: var(--spiritual-muted);
+  --accent: var(--spiritual-gold);
+  --accent-foreground: var(--spiritual-bg-dark);
+  --destructive: oklch(0.55 0.20 15);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 10%);
+  --ring: var(--spiritual-purple);
+  --chart-1: var(--spiritual-purple);
+  --chart-2: var(--spiritual-blue);
+  --chart-3: var(--spiritual-gold);
+  --chart-4: oklch(0.6 0.08 290);
+  --chart-5: oklch(0.35 0 0);
+  --sidebar: var(--spiritual-bg);
+  --sidebar-foreground: var(--spiritual-white);
+  --sidebar-primary: var(--spiritual-purple);
+  --sidebar-primary-foreground: var(--spiritual-white);
+  --sidebar-accent: var(--spiritual-gold);
+  --sidebar-accent-foreground: var(--spiritual-bg-dark);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: var(--spiritual-purple);
 }
 
 @layer base {
@@ -123,8 +141,38 @@
   }
   body {
     @apply bg-background text-foreground;
+    background: 
+      radial-gradient(ellipse 80% 80% at 50% -20%, oklch(0.15 0.06 290 / 0.3) 0%, transparent 50%),
+      radial-gradient(ellipse 80% 80% at 100% 100%, oklch(0.12 0.05 260 / 0.2) 0%, transparent 50%),
+      var(--background);
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer components {
+  /* Spiritual minimalist card styles */
+  .card {
+    @apply bg-card border border-border hover:border-border/80 transition-all duration-300;
+  }
+  
+  /* Gradient text for headings */
+  .gradient-text {
+    @apply bg-gradient-to-r from-[var(--spiritual-purple)] via-[var(--spiritual-blue)] to-[var(--spiritual-gold)] bg-clip-text text-transparent;
+  }
+  
+  /* Minimalist button with spiritual accent */
+  .spiritual-button {
+    @apply relative overflow-hidden px-6 py-2 rounded-lg font-medium transition-all duration-300;
+  }
+  
+  .spiritual-button:hover {
+    @apply shadow-lg;
+  }
+  
+  /* Glass effect for modern look */
+  .glass-effect {
+    @apply backdrop-blur-sm bg-white/[0.05] border border-white/[0.1];
   }
 }

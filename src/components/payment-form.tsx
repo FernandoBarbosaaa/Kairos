@@ -63,11 +63,11 @@ export function PaymentForm({ participantId, maxAmount, onSuccess }: PaymentForm
   }
 
   return (
-    <Card className="bg-slate-900/50 border-slate-800 p-6">
+    <Card className="bg-white/[0.03] border-white/[0.08] p-6 backdrop-blur-sm">
       <h3 className="text-lg font-semibold text-white mb-4">Registrar Pagamento</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm text-slate-400 mb-2">Valor (R$)</label>
+          <label className="block text-sm text-white/60 mb-2">Valor (R$)</label>
           <Input
             type="number"
             step="0.01"
@@ -76,18 +76,18 @@ export function PaymentForm({ participantId, maxAmount, onSuccess }: PaymentForm
             placeholder="0.00"
             value={formData.amount}
             onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-            className="bg-slate-800 border-slate-700 text-white"
+            className="bg-white/[0.05] border-white/[0.1] text-white placeholder-white/40"
           />
-          <p className="text-xs text-slate-400 mt-1">Máximo: R$ {maxAmount.toFixed(2)}</p>
+          <p className="text-xs text-white/60 mt-1">Máximo: R$ {maxAmount.toFixed(2)}</p>
         </div>
 
         <div>
-          <label className="block text-sm text-slate-400 mb-2">Método</label>
+          <label className="block text-sm text-white/60 mb-2">Método</label>
           <Select value={formData.method} onValueChange={(value) => setFormData({ ...formData, method: value })}>
-            <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+            <SelectTrigger className="bg-white/[0.05] border-white/[0.1] text-white">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-[var(--spiritual-bg-light)] border-white/[0.1]">
               <SelectItem value="pix">PIX</SelectItem>
               <SelectItem value="cash">Dinheiro</SelectItem>
               <SelectItem value="card">Cartão</SelectItem>
@@ -96,20 +96,20 @@ export function PaymentForm({ participantId, maxAmount, onSuccess }: PaymentForm
         </div>
 
         <div>
-          <label className="block text-sm text-slate-400 mb-2">Observações (opcional)</label>
+          <label className="block text-sm text-white/60 mb-2">Observações (opcional)</label>
           <Input
             type="text"
             placeholder="Adicionar observações..."
             value={formData.notes}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            className="bg-slate-800 border-slate-700 text-white"
+            className="bg-white/[0.05] border-white/[0.1] text-white placeholder-white/40"
           />
         </div>
 
         <Button
           type="submit"
           disabled={loading}
-          className="w-full bg-green-600 hover:bg-green-700 text-white"
+          className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white"
         >
           {loading ? 'Processando...' : 'Registrar Pagamento'}
         </Button>

@@ -76,63 +76,63 @@ export default function PaymentsPage() {
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
           <Link href="/dashboard">
-            <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+            <Button variant="ghost" size="sm" className="text-white/60 hover:text-white">
               <ArrowLeft className="w-4 h-4" />
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-white">Pagamentos</h1>
-            <p className="text-slate-400 mt-1">Histórico de pagamentos registrados</p>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-[var(--spiritual-purple)] to-[var(--spiritual-blue)] bg-clip-text text-transparent">Pagamentos</h1>
+            <p className="text-white/60 mt-1">Histórico de pagamentos registrados</p>
           </div>
         </div>
       </div>
 
       {/* Resumo */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="bg-slate-900/50 border-slate-800 p-6">
-          <p className="text-sm text-slate-400 mb-2">Total Recebido</p>
-          <p className="text-3xl font-bold text-green-400">R$ {totalReceived.toFixed(2)}</p>
+        <Card className="bg-white/[0.03] border-white/[0.08] p-6 backdrop-blur-sm">
+          <p className="text-sm text-white/60 mb-2">Total Recebido</p>
+          <p className="text-3xl font-bold text-emerald-400">R$ {totalReceived.toFixed(2)}</p>
         </Card>
-        <Card className="bg-slate-900/50 border-slate-800 p-6">
-          <p className="text-sm text-slate-400 mb-2">Pagamentos Pendentes</p>
-          <p className="text-3xl font-bold text-yellow-400">R$ {totalPending.toFixed(2)}</p>
+        <Card className="bg-white/[0.03] border-white/[0.08] p-6 backdrop-blur-sm">
+          <p className="text-sm text-white/60 mb-2">Pagamentos Pendentes</p>
+          <p className="text-3xl font-bold text-[var(--spiritual-gold)]">R$ {totalPending.toFixed(2)}</p>
         </Card>
       </div>
 
       {/* Lista de Pagamentos */}
       {loading ? (
         <div className="text-center py-12">
-          <p className="text-slate-400">Carregando pagamentos...</p>
+          <p className="text-white/60">Carregando pagamentos...</p>
         </div>
       ) : payments.length === 0 ? (
-        <Card className="bg-slate-900/50 border-slate-800 p-12 text-center">
-          <p className="text-slate-400 mb-4">Nenhum pagamento registrado</p>
+        <Card className="bg-white/[0.03] border-white/[0.08] p-12 text-center backdrop-blur-sm">
+          <p className="text-white/60 mb-4">Nenhum pagamento registrado</p>
         </Card>
       ) : (
-        <Card className="bg-slate-900/50 border-slate-800 overflow-hidden">
+        <Card className="bg-white/[0.03] border-white/[0.08] overflow-hidden backdrop-blur-sm">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-800/50 border-b border-slate-700">
+              <thead className="bg-white/[0.05] border-b border-white/[0.1]">
                 <tr>
-                  <th className="text-left py-4 px-6 text-slate-400 font-medium">Participante</th>
-                  <th className="text-left py-4 px-6 text-slate-400 font-medium">Valor</th>
-                  <th className="text-left py-4 px-6 text-slate-400 font-medium">Método</th>
-                  <th className="text-left py-4 px-6 text-slate-400 font-medium">Status</th>
-                  <th className="text-left py-4 px-6 text-slate-400 font-medium">Data</th>
-                  <th className="text-left py-4 px-6 text-slate-400 font-medium">Ações</th>
+                  <th className="text-left py-4 px-6 text-white/70 font-medium">Participante</th>
+                  <th className="text-left py-4 px-6 text-white/70 font-medium">Valor</th>
+                  <th className="text-left py-4 px-6 text-white/70 font-medium">Método</th>
+                  <th className="text-left py-4 px-6 text-white/70 font-medium">Status</th>
+                  <th className="text-left py-4 px-6 text-white/70 font-medium">Data</th>
+                  <th className="text-left py-4 px-6 text-white/70 font-medium">Ações</th>
                 </tr>
               </thead>
               <tbody>
                 {payments.map((payment) => (
                   <tr
                     key={payment.id}
-                    className="border-b border-slate-800 hover:bg-slate-800/30 transition"
+                    className="border-b border-white/[0.05] hover:bg-white/[0.05] transition"
                   >
                     <td className="py-4 px-6 text-white font-medium">
                       {payment.participant.fullName}
                     </td>
                     <td className="py-4 px-6 text-white">R$ {payment.amount.toFixed(2)}</td>
-                    <td className="py-4 px-6 text-slate-400">
+                    <td className="py-4 px-6 text-white/70">
                       {methodLabels[payment.method]}
                     </td>
                     <td className="py-4 px-6">
@@ -140,12 +140,12 @@ export default function PaymentsPage() {
                         {statusLabels[payment.status]}
                       </Badge>
                     </td>
-                    <td className="py-4 px-6 text-slate-400">
+                    <td className="py-4 px-6 text-white/70">
                       {new Date(payment.createdAt).toLocaleDateString("pt-BR")}
                     </td>
                     <td className="py-4 px-6">
                       <Link href={`/participants/${payment.participant.id}`}>
-                        <Button size="sm" variant="ghost" className="text-blue-400 hover:text-blue-300">
+                        <Button size="sm" variant="ghost" className="text-[var(--spiritual-blue)] hover:text-[var(--spiritual-purple)] hover:bg-white/[0.1]">
                           <Eye className="w-4 h-4" />
                         </Button>
                       </Link>

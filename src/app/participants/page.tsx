@@ -92,66 +92,66 @@ export default function ParticipantsPage() {
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
           <Link href="/dashboard">
-            <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+            <Button variant="ghost" size="sm" className="text-white/60 hover:text-white">
               <ArrowLeft className="w-4 h-4" />
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-white">Participantes</h1>
-            <p className="text-slate-400 mt-1">Gerencie todos os participantes</p>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-[var(--spiritual-purple)] to-[var(--spiritual-blue)] bg-clip-text text-transparent">Participantes</h1>
+            <p className="text-white/60 mt-1">Gerencie todos os participantes</p>
           </div>
         </div>
       </div>
 
       {loading ? (
         <div className="text-center py-12">
-          <p className="text-slate-400">Carregando participantes...</p>
+          <p className="text-white/60">Carregando participantes...</p>
         </div>
       ) : participants.length === 0 ? (
-        <Card className="bg-slate-900/50 border-slate-800 p-12 text-center">
-          <p className="text-slate-400 mb-4">Nenhum participante cadastrado</p>
+        <Card className="bg-white/[0.03] border-white/[0.08] p-12 text-center backdrop-blur-sm">
+          <p className="text-white/60 mb-4">Nenhum participante cadastrado</p>
         </Card>
       ) : (
-        <Card className="bg-slate-900/50 border-slate-800 overflow-hidden">
+        <Card className="bg-white/[0.03] border-white/[0.08] overflow-hidden backdrop-blur-sm">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-800/50 border-b border-slate-700">
+              <thead className="bg-white/[0.05] border-b border-white/[0.1]">
                 <tr>
-                  <th className="text-left py-4 px-6 text-slate-400 font-medium">Nome</th>
-                  <th className="text-left py-4 px-6 text-slate-400 font-medium">Email</th>
-                  <th className="text-left py-4 px-6 text-slate-400 font-medium">Telefone</th>
-                  <th className="text-left py-4 px-6 text-slate-400 font-medium">Evento</th>
-                  <th className="text-left py-4 px-6 text-slate-400 font-medium">Status</th>
-                  <th className="text-left py-4 px-6 text-slate-400 font-medium">Progresso</th>
-                  <th className="text-left py-4 px-6 text-slate-400 font-medium">Ações</th>
+                  <th className="text-left py-4 px-6 text-white/70 font-medium">Nome</th>
+                  <th className="text-left py-4 px-6 text-white/70 font-medium">Email</th>
+                  <th className="text-left py-4 px-6 text-white/70 font-medium">Telefone</th>
+                  <th className="text-left py-4 px-6 text-white/70 font-medium">Evento</th>
+                  <th className="text-left py-4 px-6 text-white/70 font-medium">Status</th>
+                  <th className="text-left py-4 px-6 text-white/70 font-medium">Progresso</th>
+                  <th className="text-left py-4 px-6 text-white/70 font-medium">Ações</th>
                 </tr>
               </thead>
               <tbody>
                 {participants.map((participant) => (
                   <tr
                     key={participant.id}
-                    className="border-b border-slate-800 hover:bg-slate-800/30 transition"
+                    className="border-b border-white/[0.05] hover:bg-white/[0.05] transition"
                   >
                     <td className="py-4 px-6 text-white font-medium">{participant.fullName}</td>
-                    <td className="py-4 px-6 text-slate-400">{participant.email}</td>
-                    <td className="py-4 px-6 text-slate-400">{participant.phone}</td>
-                    <td className="py-4 px-6 text-slate-400">{participant.event.name}</td>
+                    <td className="py-4 px-6 text-white/70">{participant.email}</td>
+                    <td className="py-4 px-6 text-white/70">{participant.phone}</td>
+                    <td className="py-4 px-6 text-white/70">{participant.event.name}</td>
                     <td className="py-4 px-6">
                       <Badge className={statusColors[participant.status]}>
                         {statusLabels[participant.status]}
                       </Badge>
                     </td>
-                    <td className="py-4 px-6 text-slate-400">
+                    <td className="py-4 px-6 text-white/70">
                       {participant.paidInstallments}/{participant.totalInstallments}
                     </td>
                     <td className="py-4 px-6 flex gap-2">
                       <Link href={`/participants/${participant.id}`}>
-                        <Button size="sm" variant="ghost" className="text-blue-400 hover:text-blue-300">
+                        <Button size="sm" variant="ghost" className="text-[var(--spiritual-blue)] hover:text-[var(--spiritual-purple)] hover:bg-white/[0.1]">
                           <Eye className="w-4 h-4" />
                         </Button>
                       </Link>
                       <Link href={`/participants/${participant.id}/edit`}>
-                        <Button size="sm" variant="ghost" className="text-slate-300 hover:text-white">
+                        <Button size="sm" variant="ghost" className="text-white/60 hover:text-white hover:bg-white/[0.1]">
                           <Pencil className="w-4 h-4" />
                         </Button>
                       </Link>
@@ -159,7 +159,7 @@ export default function ParticipantsPage() {
                         size="sm"
                         variant="ghost"
                         onClick={() => handleDelete(participant.id)}
-                        className="text-red-400 hover:text-red-300"
+                        className="text-red-400 hover:text-red-300 hover:bg-red-950/20"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

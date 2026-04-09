@@ -116,11 +116,13 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-2">
         <div>
-          <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-          <p className="text-slate-400 mt-1">
-            Bem-vindo ao seu painel de controle
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-[var(--spiritual-purple)] via-[var(--spiritual-blue)] to-[var(--spiritual-gold)] bg-clip-text text-transparent">
+            Dashboard
+          </h1>
+          <p className="text-white/60 mt-2">
+            Gerenciamento completo do seu retiro
           </p>
         </div>
         <NewEventButton />
@@ -178,26 +180,26 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Stats */}
-        <Card className="bg-slate-900/50 border-slate-800 p-6">
+        <Card className="bg-white/[0.03] border-white/[0.08] p-6 backdrop-blur-sm">
           <h3 className="text-lg font-semibold text-white mb-4">
             Resumo Financeiro
           </h3>
           <div className="space-y-4">
-            <div>
-              <p className="text-sm text-slate-400">Receita Total</p>
-              <p className="text-2xl font-bold text-green-400">
+            <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+              <p className="text-sm text-white/60">Receita Total</p>
+              <p className="text-2xl font-bold text-emerald-400">
                 R$ {stats.totalRevenue.toFixed(2)}
               </p>
             </div>
-            <div>
-              <p className="text-sm text-slate-400">Já Recebido</p>
-              <p className="text-2xl font-bold text-blue-400">
+            <div className="p-3 rounded-lg bg-[var(--spiritual-blue)]/10 border border-[var(--spiritual-blue)]/20">
+              <p className="text-sm text-white/60">Já Recebido</p>
+              <p className="text-2xl font-bold text-[var(--spiritual-blue)]">
                 R$ {stats.totalPaid.toFixed(2)}
               </p>
             </div>
-            <div>
-              <p className="text-sm text-slate-400">Pendência Total</p>
-              <p className="text-2xl font-bold text-yellow-400">
+            <div className="p-3 rounded-lg bg-[var(--spiritual-gold)]/10 border border-[var(--spiritual-gold)]/20">
+              <p className="text-sm text-white/60">Pendência Total</p>
+              <p className="text-2xl font-bold text-[var(--spiritual-gold)]">
                 R$ {stats.pendingPayments.toFixed(2)}
               </p>
             </div>

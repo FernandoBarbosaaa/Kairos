@@ -60,24 +60,29 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       <aside
         id="app-sidebar"
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen w-64 max-w-[85vw] bg-gradient-to-b from-slate-950 to-slate-900 border-r border-slate-800 flex flex-col transition-transform duration-200 ease-out shadow-2xl md:shadow-none",
+          "fixed left-0 top-0 z-40 h-screen w-64 max-w-[85vw] flex flex-col transition-transform duration-200 ease-out shadow-2xl md:shadow-none",
+          "bg-gradient-to-b from-[var(--spiritual-bg)] via-[var(--spiritual-bg)] to-[var(--spiritual-bg-dark)]",
+          "border-r border-white/5",
           "md:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
         aria-label="Menu lateral"
       >
         {/* Logo */}
-        <div className="p-6 border-b border-slate-800 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
-            <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
-              <CalendarDays className="w-6 h-6 text-white" />
+        <div className="p-6 border-b border-white/5 flex items-center justify-between">
+          <Link href="/dashboard" className="flex items-center gap-3" onClick={() => setIsOpen(false)}>
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[var(--spiritual-purple)] to-[var(--spiritual-blue)] flex items-center justify-center shadow-lg">
+              <span className="text-xl font-bold text-white">K</span>
             </div>
-            <span className="font-bold text-white text-lg">Kairos</span>
+            <div className="flex flex-col">
+              <span className="font-bold text-white text-lg leading-tight">Kairos</span>
+              <span className="text-xs text-[var(--spiritual-gold)] font-medium">Retiro</span>
+            </div>
           </Link>
           <button
             type="button"
             onClick={() => setIsOpen(false)}
-            className="md:hidden rounded-lg p-2.5 min-h-11 min-w-11 flex items-center justify-center text-white bg-slate-800 hover:bg-slate-700 border border-slate-600 transition"
+            className="md:hidden rounded-lg p-2.5 min-h-11 min-w-11 flex items-center justify-center text-white bg-white/10 hover:bg-white/20 border border-white/10 transition"
             aria-label="Fechar menu lateral"
           >
             <X className="w-6 h-6" />
@@ -96,13 +101,13 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                 href={item.href}
                 onClick={() => setIsOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
+                  "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 group",
                   isActive
-                    ? "bg-blue-600 text-white"
-                    : "text-slate-400 hover:text-white hover:bg-slate-800"
+                    ? "bg-gradient-to-r from-[var(--spiritual-purple)] to-[var(--spiritual-blue)] text-white shadow-lg"
+                    : "text-white/70 hover:text-white hover:bg-white/5"
                 )}
               >
-                <Icon className="w-5 h-5" />
+                <Icon className={cn("w-5 h-5 transition-transform", isActive && "group-hover:scale-110")} />
                 <span className="text-sm font-medium">{item.name}</span>
               </Link>
             );
@@ -121,17 +126,17 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-800 space-y-2">
+        <div className="p-4 border-t border-white/5 space-y-2">
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 text-slate-400 hover:text-white"
+            className="w-full justify-start gap-3 text-white/70 hover:text-white hover:bg-white/5 transition-all"
           >
             <Settings className="w-5 h-5" />
             <span className="text-sm">Configurações</span>
           </Button>
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 text-red-400 hover:text-red-300 hover:bg-red-950"
+            className="w-full justify-start gap-3 text-red-400/70 hover:text-red-300 hover:bg-red-950/20 transition-all"
           >
             <LogOut className="w-5 h-5" />
             <span className="text-sm">Sair</span>

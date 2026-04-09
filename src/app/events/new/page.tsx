@@ -51,14 +51,14 @@ export default function NewEventPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <Link href="/events">
-          <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+          <Button variant="ghost" size="sm" className="text-white/60 hover:text-white">
             <ArrowLeft className="w-4 h-4" />
           </Button>
         </Link>
-        <h1 className="text-3xl font-bold text-white">Novo Evento</h1>
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-[var(--spiritual-purple)] to-[var(--spiritual-blue)] bg-clip-text text-transparent">Novo Evento</h1>
       </div>
 
-      <Card className="bg-slate-900/50 border-slate-800 p-8 max-w-2xl">
+      <Card className="bg-white/[0.03] border-white/[0.08] p-8 max-w-2xl backdrop-blur-sm">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-white mb-2">
@@ -70,7 +70,7 @@ export default function NewEventPage() {
               placeholder="Ex: Retiro Espiritual 2026"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="bg-slate-900 border-slate-700 text-white placeholder:text-slate-500"
+              className="bg-white/[0.05] border-white/[0.1] text-white placeholder:text-white/40"
             />
           </div>
 
@@ -83,7 +83,7 @@ export default function NewEventPage() {
               required
               value={formData.eventDate}
               onChange={(e) => setFormData({ ...formData, eventDate: e.target.value })}
-              className="bg-slate-900 border-slate-700 text-white"
+              className="bg-white/[0.05] border-white/[0.1] text-white"
             />
           </div>
 
@@ -97,7 +97,7 @@ export default function NewEventPage() {
               placeholder="Ex: Sítio Recanto da Paz"
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              className="bg-slate-900 border-slate-700 text-white placeholder:text-slate-500"
+              className="bg-white/[0.05] border-white/[0.1] text-white placeholder:text-white/40"
             />
           </div>
 
@@ -110,7 +110,7 @@ export default function NewEventPage() {
               placeholder="Detalhes do retiro (opcional)"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="bg-slate-900 border-slate-700 text-white placeholder:text-slate-500"
+              className="bg-white/[0.05] border-white/[0.1] text-white placeholder:text-white/40"
             />
           </div>
 
@@ -119,7 +119,7 @@ export default function NewEventPage() {
               Valor Total do Retiro *
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-3 text-slate-400">R$</span>
+              <span className="absolute left-3 top-3 text-white/60">R$</span>
               <Input
                 type="number"
                 step="0.01"
@@ -128,7 +128,7 @@ export default function NewEventPage() {
                 placeholder="0,00"
                 value={formData.totalPrice}
                 onChange={(e) => setFormData({ ...formData, totalPrice: e.target.value })}
-                className="bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 pl-8"
+                className="bg-white/[0.05] border-white/[0.1] text-white placeholder:text-white/40 pl-8"
               />
             </div>
           </div>
@@ -148,7 +148,7 @@ export default function NewEventPage() {
                 !formData.location ||
                 !formData.totalPrice
               }
-              className="flex-1 bg-blue-600 hover:bg-blue-700"
+              className="flex-1 bg-gradient-to-r from-[var(--spiritual-purple)] to-[var(--spiritual-blue)] hover:shadow-lg hover:shadow-[var(--spiritual-purple)]/30"
             >
               {loading ? "Criando..." : "Criar Evento"}
             </Button>
