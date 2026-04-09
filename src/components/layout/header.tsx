@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, User } from "lucide-react";
+import { Bell, Menu, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,10 +9,36 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export function Header() {
+interface HeaderProps {
+  isSidebarOpen: boolean;
+  onMenuToggle: () => void;
+}
+
+export function Header({ isSidebarOpen, onMenuToggle }: HeaderProps) {
   return (
-    <header className="fixed top-0 right-0 left-64 h-16 bg-slate-950 border-b border-slate-800 flex items-center justify-between px-6 z-40">
-      <div className="flex-1" />
+    <header className="fixed top-0 right-0 left-0 md:left-64 z-50 h-16 bg-slate-950 border-b border-slate-800 flex items-center justify-between px-4 md:px-6">
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onMenuToggle}
+          className="md:hidden flex items-center gap-2 rounded-lg px-3 py-2.5 min-h-11 text-slate-100 bg-slate-800/90 hover:bg-slate-700 border border-slate-600 shadow-sm transition"
+          aria-expanded={isSidebarOpen}
+          aria-controls="app-sidebar"
+          aria-label={isSidebarOpen ? "Fechar menu de navegação" : "Abrir menu de navegação"}
+        >
+          {isSidebarOpen ? (
+            <>
+              <X className="w-6 h-6 shrink-0" aria-hidden />
+              <span className="text-sm font-semibold">Fechar</span>
+            </>
+          ) : (
+            <>
+              <Menu className="w-6 h-6 shrink-0" aria-hidden />
+              <span className="text-sm font-medium">Menu</span>
+            </>
+          )}
+        </button>
+      </div>
 
       <div className="flex items-center gap-4">
         {/* Notifications */}
