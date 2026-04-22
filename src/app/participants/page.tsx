@@ -3,10 +3,11 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trash2, ArrowLeft, Eye, Pencil } from "lucide-react";
+import { Trash2, ArrowLeft, Eye, Pencil, Download, ExternalLink } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { PARTICIPANTS_SHEET_URL } from "@/lib/google-sheets";
 
 interface Participant {
   id: string;
@@ -34,6 +35,7 @@ async function getAllParticipants(): Promise<Participant[]> {
 export default function ParticipantsPage() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     loadParticipants();
@@ -71,6 +73,37 @@ export default function ParticipantsPage() {
     }
   }
 
+  async function handleExportToGoogleSheets() {
+    try {
+      setExporting(true);
+
+      const response = await fetch("/api/integrations/google-sheets/export", {
+        method: "POST",
+      });
+
+      const result = (await response.json()) as
+        | { exported: number; skipped: number; worksheet: string }
+        | { error: string };
+
+      if (!response.ok || "error" in result) {
+        throw new Error("error" in result ? result.error : "Falha ao exportar participantes");
+      }
+
+      toast.success(
+        `Exportação concluída: ${result.exported} novo(s), ${result.skipped} já existente(s) em ${result.worksheet}.`
+      );
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível exportar para o Google Sheets"
+      );
+    } finally {
+      setExporting(false);
+    }
+  }
+
   const statusColors = {
     paid: "bg-green-500/20 text-green-400",
     pending: "bg-yellow-500/20 text-yellow-400",
@@ -98,6 +131,23 @@ export default function ParticipantsPage() {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-[var(--spiritual-purple)] to-[var(--spiritual-blue)] bg-clip-text text-transparent">Participantes</h1>
             <p className="text-white/60 mt-1">Gerencie todos os participantes</p>
           </div>
+        </div>
+        <div className="flex gap-3">
+          <Button
+            type="button"
+            onClick={handleExportToGoogleSheets}
+            disabled={exporting}
+            className="gap-2 bg-emerald-600 hover:bg-emerald-700"
+          >
+            <Download className="w-4 h-4" />
+            {exporting ? "Exportando..." : "Exportar para Google Sheets"}
+          </Button>
+          <a href={PARTICIPANTS_SHEET_URL} target="_blank" rel="noreferrer">
+            <Button type="button" variant="outline" className="gap-2">
+              <ExternalLink className="w-4 h-4" />
+              Acessar Planilha de Participantes
+            </Button>
+          </a>
         </div>
       </div>
 
