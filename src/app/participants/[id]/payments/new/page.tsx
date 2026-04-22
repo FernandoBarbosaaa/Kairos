@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 
 interface Installment {
@@ -38,11 +38,7 @@ export default function NewPaymentPage() {
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
 
-  useEffect(() => {
-    loadParticipantData();
-  }, [participantId]);
-
-  async function loadParticipantData() {
+  const loadParticipantData = useCallback(async () => {
     try {
       const res = await fetch(`/api/participants/${participantId}`, { cache: "no-store" });
       if (!res.ok) throw new Error("Falha ao buscar participante");
@@ -54,7 +50,11 @@ export default function NewPaymentPage() {
     } finally {
       setLoadingData(false);
     }
-  }
+  }, [participantId]);
+
+  useEffect(() => {
+    void loadParticipantData();
+  }, [loadParticipantData]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 
 interface Lot {
@@ -33,6 +33,7 @@ interface Event {
   id: string;
   name: string;
   eventDate: Date;
+  location?: string;
   lots: Lot[];
   participants: Participant[];
 }
@@ -46,30 +47,32 @@ export default function EventDetailPage() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadEventData();
-  }, [eventId]);
-
-  async function loadEventData() {
+  const loadEventData = useCallback(async () => {
     try {
       setLoading(true);
       const [eventRes, participantsRes] = await Promise.all([
         fetch(`/api/events/${eventId}`, { cache: "no-store" }),
         fetch(`/api/participants?eventId=${eventId}`, { cache: "no-store" }),
       ]);
+
       if (!eventRes.ok) throw new Error("Falha ao buscar evento");
       if (!participantsRes.ok) throw new Error("Falha ao buscar participantes");
-      const eventData = await eventRes.json();
-      const participantsData = await participantsRes.json();
-      setEvent(eventData as any);
-      setParticipants(participantsData as any);
+
+      const eventData = (await eventRes.json()) as Event;
+      const participantsData = (await participantsRes.json()) as Participant[];
+      setEvent(eventData);
+      setParticipants(participantsData);
     } catch (error) {
       toast.error("Erro ao carregar evento");
       console.error(error);
     } finally {
       setLoading(false);
     }
-  }
+  }, [eventId]);
+
+  useEffect(() => {
+    void loadEventData();
+  }, [loadEventData]);
 
   async function handleDeleteParticipant(participantId: string) {
     if (!confirm("Tem certeza que deseja deletar este participante?")) return;
@@ -100,19 +103,21 @@ export default function EventDetailPage() {
     }
   }
 
-  if (loading)
+  if (loading) {
     return (
       <div className="text-center py-12">
         <p className="text-slate-400">Carregando...</p>
       </div>
     );
+  }
 
-  if (!event)
+  if (!event) {
     return (
       <div className="text-center py-12">
         <p className="text-slate-400">Evento não encontrado</p>
       </div>
     );
+  }
 
   const statusBadgeClass = {
     paid: "bg-green-500/20 text-green-400",
@@ -139,11 +144,9 @@ export default function EventDetailPage() {
         <div className="flex-1">
           <h1 className="text-3xl font-bold text-white">{event.name}</h1>
           <p className="text-slate-400 mt-1">
-            📅 {new Date(event.eventDate).toLocaleDateString("pt-BR")}
+            {new Date(event.eventDate).toLocaleDateString("pt-BR")}
           </p>
-          {"location" in event && (
-            <p className="text-slate-400 mt-1">📍 {(event as any).location}</p>
-          )}
+          {event.location && <p className="text-slate-400 mt-1">{event.location}</p>}
         </div>
         <Button
           variant="outline"
@@ -155,7 +158,6 @@ export default function EventDetailPage() {
         </Button>
       </div>
 
-      {/* Lotes */}
       <Card className="bg-slate-900/50 border-slate-800 p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-white">Lotes</h2>
@@ -175,7 +177,8 @@ export default function EventDetailPage() {
                 <h3 className="font-semibold text-white mb-2">{lot.name}</h3>
                 <p className="text-sm text-green-400 mb-2">R$ {lot.price.toFixed(2)}</p>
                 <p className="text-xs text-slate-400">
-                  {new Date(lot.startDate).toLocaleDateString("pt-BR")} - {new Date(lot.endDate).toLocaleDateString("pt-BR")}
+                  {new Date(lot.startDate).toLocaleDateString("pt-BR")} -{" "}
+                  {new Date(lot.endDate).toLocaleDateString("pt-BR")}
                 </p>
               </div>
             ))}
@@ -183,7 +186,6 @@ export default function EventDetailPage() {
         )}
       </Card>
 
-      {/* Participantes */}
       <Card className="bg-slate-900/50 border-slate-800 p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-white">Participantes ({participants.length})</h2>
@@ -218,7 +220,10 @@ export default function EventDetailPage() {
                     <td className="py-3 px-4 text-slate-400">{participant.lot?.name}</td>
                     <td className="py-3 px-4">
                       <Badge
-                        className={statusBadgeClass[participant.status as keyof typeof statusBadgeClass] || "bg-slate-700 text-slate-300"}
+                        className={
+                          statusBadgeClass[participant.status as keyof typeof statusBadgeClass] ||
+                          "bg-slate-700 text-slate-300"
+                        }
                       >
                         {statusLabel[participant.status as keyof typeof statusLabel] || participant.status}
                       </Badge>

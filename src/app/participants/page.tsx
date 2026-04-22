@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Trash2, ArrowLeft, Eye, Pencil } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 interface Participant {
@@ -35,7 +34,6 @@ async function getAllParticipants(): Promise<Participant[]> {
 export default function ParticipantsPage() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
     loadParticipants();

@@ -1,5 +1,4 @@
 import jsPDF from "jspdf";
-import { IPayment } from "@/types";
 
 interface PaymentReceiptData {
   participantName: string;

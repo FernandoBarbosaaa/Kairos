@@ -11,6 +11,15 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 type LotOption = { id: string; name: string; price: number };
+type EditableParticipant = {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  lotId: string;
+  totalInstallments: number;
+  eventId: string;
+};
 
 export default function EditParticipantPage() {
   const params = useParams();
@@ -20,7 +29,7 @@ export default function EditParticipantPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const [participant, setParticipant] = useState<any>(null);
+  const [participant, setParticipant] = useState<EditableParticipant | null>(null);
   const [lots, setLots] = useState<LotOption[]>([]);
 
   const [formData, setFormData] = useState({
@@ -43,7 +52,7 @@ export default function EditParticipantPage() {
         setLoading(true);
         const res = await fetch(`/api/participants/${participantId}`, { cache: "no-store" });
         if (!res.ok) throw new Error("Falha ao carregar participante");
-        const data = await res.json();
+        const data = (await res.json()) as EditableParticipant;
         if (cancelled) return;
 
         setParticipant(data);
@@ -56,7 +65,9 @@ export default function EditParticipantPage() {
         });
 
         const lotsRes = await fetch(`/api/lots?eventId=${data.eventId}`, { cache: "no-store" });
-        if (lotsRes.ok && !cancelled) setLots(await lotsRes.json());
+        if (lotsRes.ok && !cancelled) {
+          setLots((await lotsRes.json()) as LotOption[]);
+        }
       } catch (error) {
         console.error(error);
         toast.error("Erro ao carregar participante");

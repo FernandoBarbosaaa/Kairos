@@ -2,7 +2,6 @@
 
 import { prisma } from "@/lib/prisma";
 import { createParticipantSchema } from "@/lib/validators";
-import { createInstallments } from "@/lib/payment-utils";
 import { getCurrentLot } from "@/lib/lot-utils";
 import { revalidatePath } from "next/cache";
 

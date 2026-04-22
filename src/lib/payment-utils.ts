@@ -84,7 +84,7 @@ export async function getEventFinancialSummary(eventId: string) {
     },
   });
 
-  let totalParticipants = participants.length;
+  const totalParticipants = participants.length;
   let totalRevenue = 0;
   let totalPaid = 0;
   let totalPending = 0;

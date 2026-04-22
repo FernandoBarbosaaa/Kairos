@@ -1,9 +1,10 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { createParticipantSchema } from "@/lib/validators";
 
 export async function DELETE(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -78,8 +79,11 @@ export async function PUT(
     });
 
     return NextResponse.json(updated);
-  } catch (error: any) {
-    if (error?.code === "P2002") {
+  } catch (error: unknown) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
       return NextResponse.json(
         { error: "Já existe um participante com este email neste evento" },
         { status: 409 }

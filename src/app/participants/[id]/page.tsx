@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Plus } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { Pencil } from "lucide-react";
 
@@ -50,11 +50,7 @@ export default function ParticipantDetailPage() {
   const [participant, setParticipant] = useState<Participant | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadParticipantData();
-  }, [participantId]);
-
-  async function loadParticipantData() {
+  const loadParticipantData = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch(`/api/participants/${participantId}`, { cache: "no-store" });
@@ -67,7 +63,11 @@ export default function ParticipantDetailPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [participantId]);
+
+  useEffect(() => {
+    void loadParticipantData();
+  }, [loadParticipantData]);
 
   if (loading)
     return (

@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { createParticipantSchema } from "@/lib/validators";
@@ -75,9 +76,12 @@ export async function POST(req: NextRequest) {
     await prisma.installment.createMany({ data: installments });
 
     return NextResponse.json(participant, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Unique constraint: (eventId,email)
-    if (error?.code === "P2002") {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
       return NextResponse.json(
         { error: "Já existe um participante com este email neste evento" },
         { status: 409 }

@@ -13,6 +13,10 @@ interface RegisterPaymentDialogProps {
   installmentId?: string;
 }
 
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
 export function RegisterPaymentDialog({
   open,
   onOpenChange,
@@ -64,8 +68,8 @@ export function RegisterPaymentDialog({
       toast.success("Pagamento registrado com sucesso!");
       setFormData({ amount: 0, method: "pix", notes: "" });
       onOpenChange(false);
-    } catch (error: any) {
-      toast.error(error.message || "Erro ao registrar pagamento");
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Erro ao registrar pagamento"));
       console.error(error);
     } finally {
       setLoading(false);

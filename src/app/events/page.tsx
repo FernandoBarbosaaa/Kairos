@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Plus, Trash2, Eye, ArrowLeft } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 interface Event {
@@ -19,7 +18,6 @@ interface Event {
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
     loadEvents();

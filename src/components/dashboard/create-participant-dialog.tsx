@@ -13,6 +13,10 @@ interface CreateParticipantDialogProps {
   eventId: string;
 }
 
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
 export function CreateParticipantDialog({
   open,
   onOpenChange,
@@ -85,8 +89,8 @@ export function CreateParticipantDialog({
       toast.success("Participante adicionado com sucesso!");
       setFormData({ fullName: "", email: "", phone: "", lotId: "", totalInstallments: 12 });
       onOpenChange(false);
-    } catch (error: any) {
-      toast.error(error.message || "Erro ao adicionar participante");
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Erro ao adicionar participante"));
       console.error(error);
     } finally {
       setLoading(false);

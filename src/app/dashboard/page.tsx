@@ -5,14 +5,7 @@ import { RecentEventsCard } from "@/components/dashboard/recent-events";
 import { NewEventButton } from "@/components/dashboard/new-event-button";
 
 export const dynamic = "force-dynamic";
-import {
-  TrendingUp,
-  Users,
-  DollarSign,
-  AlertCircle,
-  CheckCircle2,
-  Clock,
-} from "lucide-react";
+import { TrendingUp, Users, DollarSign, AlertCircle, Clock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 
@@ -34,6 +27,23 @@ interface RecentEvent {
   totalRevenue: number;
 }
 
+interface DashboardPayment {
+  amount: number;
+  status: string;
+}
+
+interface DashboardParticipant {
+  agreedPrice?: number;
+  payments?: DashboardPayment[];
+}
+
+interface DashboardEvent {
+  id: string;
+  name: string;
+  eventDate: string;
+  participants?: DashboardParticipant[];
+}
+
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats>({
     totalEvents: 0,
@@ -46,23 +56,22 @@ export default function DashboardPage() {
   });
 
   const [recentEvents, setRecentEvents] = useState<RecentEvent[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
       try {
         const res = await fetch("/api/events", { cache: "no-store" });
         if (!res.ok) throw new Error("Falha ao buscar eventos");
-        const events = await res.json();
+        const events = (await res.json()) as DashboardEvent[];
 
         // Convert to RecentEvent format
-        const recentEventsConverted: RecentEvent[] = events.map((event: any) => ({
+        const recentEventsConverted: RecentEvent[] = events.map((event) => ({
           id: event.id,
           name: event.name,
           eventDate: new Date(event.eventDate),
           participants: event.participants?.length || 0,
           totalRevenue: event.participants?.reduce(
-            (sum: number, p: any) => sum + (p.agreedPrice || 0),
+            (sum, participant) => sum + (participant.agreedPrice || 0),
             0
           ) || 0,
         }));
@@ -71,25 +80,28 @@ export default function DashboardPage() {
 
         // Calculate stats
         const totalParticipants = events.reduce(
-          (sum: number, e: any) => sum + (e.participants?.length || 0),
+          (sum, event) => sum + (event.participants?.length || 0),
           0
         );
 
-        const totalRevenue = events.reduce((sum: number, e: any) => {
+        const totalRevenue = events.reduce((sum, event) => {
           return (
             sum +
-            (e.participants?.reduce((s: number, p: any) => s + (p.agreedPrice || 0), 0) || 0)
+            (event.participants?.reduce(
+              (subtotal, participant) => subtotal + (participant.agreedPrice || 0),
+              0
+            ) || 0)
           );
         }, 0);
 
-        const totalPaid = events.reduce((sum: number, e: any) => {
+        const totalPaid = events.reduce((sum, event) => {
           return (
             sum +
-            (e.participants?.reduce((s: number, p: any) => {
-              const paid = p.payments?.reduce((ps: number, pay: any) => {
-                return ps + (pay.status === "completed" ? pay.amount : 0);
+            (event.participants?.reduce((subtotal, participant) => {
+              const paid = participant.payments?.reduce((paymentSum, payment) => {
+                return paymentSum + (payment.status === "completed" ? payment.amount : 0);
               }, 0) || 0;
-              return s + paid;
+              return subtotal + paid;
             }, 0) || 0)
           );
         }, 0);
@@ -105,8 +117,6 @@ export default function DashboardPage() {
         });
       } catch (error) {
         console.error("Erro ao carregar dados:", error);
-      } finally {
-        setLoading(false);
       }
     }
 
