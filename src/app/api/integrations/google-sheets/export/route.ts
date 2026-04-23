@@ -4,7 +4,6 @@ import { prisma } from "@/lib/prisma";
 import {
   DEFAULT_PARTICIPANTS_WORKSHEET_TITLE,
   getSpreadsheetIdFromUrl,
-  normalizeSheetLabel,
   PARTICIPANTS_SHEET_URL,
   REQUIRED_PARTICIPANTS_HEADERS,
 } from "@/lib/google-sheets";
@@ -134,32 +133,16 @@ async function ensureHeaders(
   worksheetTitle: string,
   sheets: Awaited<ReturnType<typeof getSheetsClient>>
 ) {
-  const values = await getWorksheetData(spreadsheetId, worksheetTitle, sheets);
-  const currentHeaders = values[0] ?? [];
-  const normalizedCurrentHeaders = new Set(
-    currentHeaders.map((header) => normalizeSheetLabel(header))
-  );
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: `${worksheetTitle}!A1:G1`,
+    valueInputOption: "USER_ENTERED",
+    requestBody: {
+      values: [[...REQUIRED_PARTICIPANTS_HEADERS]],
+    },
+  });
 
-  const mergedHeaders = [...currentHeaders];
-
-  for (const requiredHeader of REQUIRED_PARTICIPANTS_HEADERS) {
-    if (!normalizedCurrentHeaders.has(normalizeSheetLabel(requiredHeader))) {
-      mergedHeaders.push(requiredHeader);
-    }
-  }
-
-  if (values.length === 0 || mergedHeaders.length !== currentHeaders.length) {
-    await sheets.spreadsheets.values.update({
-      spreadsheetId,
-      range: `${worksheetTitle}!A1`,
-      valueInputOption: "USER_ENTERED",
-      requestBody: {
-        values: [mergedHeaders],
-      },
-    });
-  }
-
-  return mergedHeaders.length > 0 ? mergedHeaders : [...REQUIRED_PARTICIPANTS_HEADERS];
+  return [...REQUIRED_PARTICIPANTS_HEADERS];
 }
 
 function buildExistingKeys(rows: string[][], headers: string[]) {
