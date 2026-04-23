@@ -18,7 +18,7 @@ type ParticipantRow = {
   Valor: string;
   Vencimento: string;
   Status: string;
-  "Pago?": string;
+  "Se Pagou": string;
 };
 
 type ExportResult = {
