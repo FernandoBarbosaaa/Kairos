@@ -75,6 +75,51 @@ async function getSheetsClient() {
   return google.sheets({ version: "v4", auth });
 }
 
+function isSameMonthOrEarlier(date: Date, reference: Date) {
+  const dateYear = date.getFullYear();
+  const referenceYear = reference.getFullYear();
+
+  if (dateYear < referenceYear) return true;
+  if (dateYear > referenceYear) return false;
+
+  return date.getMonth() <= reference.getMonth();
+}
+
+function getMonthlyPaymentStatus(
+  participant: {
+    agreedPrice: number;
+    installments: Array<{
+      amount: number;
+      dueDate: Date;
+      status: string;
+    }>;
+  },
+  now: Date
+) {
+  const nextOpenInstallment = participant.installments.find(
+    (installment) => installment.status !== "paid"
+  );
+
+  if (!nextOpenInstallment) {
+    return {
+      status: "pago",
+      paidCurrentMonth: "Sim",
+      nextInstallment: null,
+    };
+  }
+
+  const currentMonthStillCovered = !isSameMonthOrEarlier(
+    nextOpenInstallment.dueDate,
+    now
+  );
+
+  return {
+    status: currentMonthStillCovered ? "pago" : "pendente",
+    paidCurrentMonth: currentMonthStillCovered ? "Sim" : "Não",
+    nextInstallment: nextOpenInstallment,
+  };
+}
+
 async function fetchParticipants(): Promise<ParticipantRow[]> {
   const participants = await prisma.participant.findMany({
     include: {
@@ -94,25 +139,22 @@ async function fetchParticipants(): Promise<ParticipantRow[]> {
     currency: "BRL",
   });
   const formatDate = new Intl.DateTimeFormat("pt-BR");
+  const now = new Date();
 
-  return participants.map((participant) => ({
-    "Nome do participante": participant.fullName,
-    Whatsapp: participant.phone,
-    Email: participant.email,
-    Valor: formatCurrency.format(
-      participant.installments.find((installment) => installment.status !== "paid")?.amount ??
-        participant.agreedPrice
-    ),
-    Vencimento: (() => {
-      const nextOpenInstallment = participant.installments.find(
-        (installment) => installment.status !== "paid"
-      );
+  return participants.map((participant) => {
+    const monthlyStatus = getMonthlyPaymentStatus(participant, now);
+    const nextInstallment = monthlyStatus.nextInstallment;
 
-      return nextOpenInstallment ? formatDate.format(nextOpenInstallment.dueDate) : "";
-    })(),
-    Status: participant.status,
-    "Se Pagou": participant.status === "paid" ? "Sim" : "Não",
-  }));
+    return {
+      "Nome do participante": participant.fullName,
+      Whatsapp: participant.phone,
+      Email: participant.email,
+      Valor: formatCurrency.format(nextInstallment?.amount ?? participant.agreedPrice),
+      Vencimento: nextInstallment ? formatDate.format(nextInstallment.dueDate) : "",
+      Status: monthlyStatus.status,
+      "Se Pagou": monthlyStatus.paidCurrentMonth,
+    };
+  });
 }
 
 async function getWorksheetData(
@@ -145,46 +187,51 @@ async function ensureHeaders(
   return [...REQUIRED_PARTICIPANTS_HEADERS];
 }
 
-function buildExistingKeys(rows: string[][], headers: string[]) {
+function buildExistingRowsMap(rows: string[][], headers: string[]) {
   const emailIndex = headers.indexOf("Email");
   const whatsappIndex = headers.indexOf("Whatsapp");
-  const existingKeys = new Set<string>();
+  const existingRows = new Map<string, number>();
 
-  for (const row of rows.slice(1)) {
+  for (const [index, row] of rows.slice(1).entries()) {
     const email = (row[emailIndex] ?? "").trim().toLowerCase();
     const whatsapp = (row[whatsappIndex] ?? "").trim().toLowerCase();
 
     if (email || whatsapp) {
-      existingKeys.add(`${email}::${whatsapp}`);
+      existingRows.set(`${email}::${whatsapp}`, index + 2);
     }
   }
 
-  return existingKeys;
+  return existingRows;
 }
 
-function buildRowsToAppend(
+function buildRowsToSync(
   participants: ParticipantRow[],
   headers: string[],
-  existingKeys: Set<string>
+  existingRows: Map<string, number>
 ) {
   const rowsToAppend: string[][] = [];
-  let skipped = 0;
+  const rowsToUpdate: Array<{ rowNumber: number; values: string[] }> = [];
 
   for (const participant of participants) {
     const key = `${participant.Email.trim().toLowerCase()}::${participant.Whatsapp
       .trim()
       .toLowerCase()}`;
+    const rowValues = headers.map(
+      (header) => participant[header as keyof ParticipantRow] ?? ""
+    );
+    const existingRowNumber = existingRows.get(key);
 
-    if (existingKeys.has(key)) {
-      skipped += 1;
-      continue;
+    if (existingRowNumber) {
+      rowsToUpdate.push({
+        rowNumber: existingRowNumber,
+        values: rowValues,
+      });
+    } else {
+      rowsToAppend.push(rowValues);
     }
-
-    rowsToAppend.push(headers.map((header) => participant[header as keyof ParticipantRow] ?? ""));
-    existingKeys.add(key);
   }
 
-  return { rowsToAppend, skipped };
+  return { rowsToAppend, rowsToUpdate };
 }
 
 async function exportParticipantsToGoogleSheets(): Promise<ExportResult> {
@@ -199,12 +246,25 @@ async function exportParticipantsToGoogleSheets(): Promise<ExportResult> {
   const participants = await fetchParticipants();
   const headers = await ensureHeaders(spreadsheetId, worksheetTitle, sheets);
   const values = await getWorksheetData(spreadsheetId, worksheetTitle, sheets);
-  const existingKeys = buildExistingKeys(values, headers);
-  const { rowsToAppend, skipped } = buildRowsToAppend(
+  const existingRows = buildExistingRowsMap(values, headers);
+  const { rowsToAppend, rowsToUpdate } = buildRowsToSync(
     participants,
     headers,
-    existingKeys
+    existingRows
   );
+
+  if (rowsToUpdate.length > 0) {
+    await sheets.spreadsheets.values.batchUpdate({
+      spreadsheetId,
+      requestBody: {
+        valueInputOption: "USER_ENTERED",
+        data: rowsToUpdate.map((row) => ({
+          range: `${worksheetTitle}!A${row.rowNumber}:G${row.rowNumber}`,
+          values: [row.values],
+        })),
+      },
+    });
+  }
 
   if (rowsToAppend.length > 0) {
     await sheets.spreadsheets.values.append({
@@ -219,8 +279,8 @@ async function exportParticipantsToGoogleSheets(): Promise<ExportResult> {
 
   return {
     worksheet: worksheetTitle,
-    exported: rowsToAppend.length,
-    skipped,
+    exported: rowsToAppend.length + rowsToUpdate.length,
+    skipped: 0,
     totalParticipants: participants.length,
   };
 }
