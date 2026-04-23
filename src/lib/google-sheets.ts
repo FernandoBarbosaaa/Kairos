@@ -3,10 +3,13 @@ export const PARTICIPANTS_SHEET_URL =
 
 export const DEFAULT_PARTICIPANTS_WORKSHEET_TITLE = "Página1";
 export const REQUIRED_PARTICIPANTS_HEADERS = [
-  "Nome",
-  "E-mail",
-  "Status de Inscrição",
-  "Evento",
+  "Nome do participante",
+  "Whatsapp",
+  "Email",
+  "Valor",
+  "Vencimento",
+  "Status",
+  "Se Pagou",
 ] as const;
 
 export function getSpreadsheetIdFromUrl(url: string): string {

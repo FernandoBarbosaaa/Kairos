@@ -12,10 +12,13 @@ import {
 export const runtime = "nodejs";
 
 type ParticipantRow = {
-  Nome: string;
-  "E-mail": string;
-  "Status de Inscrição": string;
-  Evento: string;
+  "Nome do participante": string;
+  Whatsapp: string;
+  Email: string;
+  Valor: string;
+  Vencimento: string;
+  Status: string;
+  "Pago?": string;
 };
 
 type ExportResult = {
@@ -76,9 +79,9 @@ async function getSheetsClient() {
 async function fetchParticipants(): Promise<ParticipantRow[]> {
   const participants = await prisma.participant.findMany({
     include: {
-      event: {
-        select: {
-          name: true,
+      installments: {
+        orderBy: {
+          dueDate: "asc",
         },
       },
     },
@@ -87,11 +90,29 @@ async function fetchParticipants(): Promise<ParticipantRow[]> {
     },
   });
 
+  const formatCurrency = new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+  const formatDate = new Intl.DateTimeFormat("pt-BR");
+
   return participants.map((participant) => ({
-    Nome: participant.fullName,
-    "E-mail": participant.email,
-    "Status de Inscrição": participant.status,
-    Evento: participant.event.name,
+    "Nome do participante": participant.fullName,
+    Whatsapp: participant.phone,
+    Email: participant.email,
+    Valor: formatCurrency.format(
+      participant.installments.find((installment) => installment.status !== "paid")?.amount ??
+        participant.agreedPrice
+    ),
+    Vencimento: (() => {
+      const nextOpenInstallment = participant.installments.find(
+        (installment) => installment.status !== "paid"
+      );
+
+      return nextOpenInstallment ? formatDate.format(nextOpenInstallment.dueDate) : "";
+    })(),
+    Status: participant.status,
+    "Se Pagou": participant.status === "paid" ? "Sim" : "Não",
   }));
 }
 
@@ -142,16 +163,16 @@ async function ensureHeaders(
 }
 
 function buildExistingKeys(rows: string[][], headers: string[]) {
-  const emailIndex = headers.indexOf("E-mail");
-  const eventIndex = headers.indexOf("Evento");
+  const emailIndex = headers.indexOf("Email");
+  const whatsappIndex = headers.indexOf("Whatsapp");
   const existingKeys = new Set<string>();
 
   for (const row of rows.slice(1)) {
     const email = (row[emailIndex] ?? "").trim().toLowerCase();
-    const event = (row[eventIndex] ?? "").trim().toLowerCase();
+    const whatsapp = (row[whatsappIndex] ?? "").trim().toLowerCase();
 
-    if (email) {
-      existingKeys.add(`${email}::${event}`);
+    if (email || whatsapp) {
+      existingKeys.add(`${email}::${whatsapp}`);
     }
   }
 
@@ -167,7 +188,7 @@ function buildRowsToAppend(
   let skipped = 0;
 
   for (const participant of participants) {
-    const key = `${participant["E-mail"].trim().toLowerCase()}::${participant.Evento
+    const key = `${participant.Email.trim().toLowerCase()}::${participant.Whatsapp
       .trim()
       .toLowerCase()}`;
 
